@@ -8,11 +8,12 @@ class UserController:
         name = data.get('name')
         email = data.get('email')
         password = data.get('password')
+        phone = data.get('phone')
 
-        if not name or not email or not password:
+        if not name or not email or not password or phone:
             return make_response(jsonify({"erro": "Missing required fields"}), 400)
 
-        user = UserService.create_user(name, email, password)
+        user = UserService.create_user(name, email, password, phone)
         return make_response(jsonify({
             "mensagem": "User salvo com sucesso",
             "usuarios": user.to_dict()
