@@ -20,13 +20,13 @@ class UserService:
         if existing_user:
             raise ValueError("Usuário com este email já existe")
 
-        # gerar código aleatório
+        # gera o código aleatório
         code = random.randint(10000, 99999)
 
         # hash da senha
         hashed_password = generate_password_hash(password)
 
-        # envio do WhatsApp com tratamento de erro
+        # tratamento de erro do envio de whatsapp
         try:
             response = Whatsapp.send_message(phone, code)
         except Exception as e:
@@ -47,6 +47,5 @@ class UserService:
         return UserDomain(
             user.id,
             user.name,
-            user.email,
-            user.password
+            user.email
         )

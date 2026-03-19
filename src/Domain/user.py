@@ -1,8 +1,8 @@
 class UserDomain:
-    def __init__(self, id, name, email, password):
+    def __init__(self, id, name, email):
         self.id = id
         self.name = name
-        self.email = email        
+        self.email = email
     
     def to_dict(self):
         return {
