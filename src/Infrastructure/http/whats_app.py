@@ -7,7 +7,7 @@ load_dotenv() # Carrega o .env
 class Whatsapp:
     ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
     AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-    FROM_WHATSAPP = "whatsapp:+14155238886"
+    FROM_WHATSAPP = "whatsapp:+55155238886"
 
     @staticmethod
     def send_message(phone, code):
