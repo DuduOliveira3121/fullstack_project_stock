@@ -1,4 +1,5 @@
 from flask import request, jsonify, make_response
+from flask_jwt_extended import create_access_token
 from src.Application.Service.user_service import UserService
 
 class UserController:
@@ -49,3 +50,26 @@ class UserController:
             return make_response(jsonify({"erro": str(e)}), 400)
         except Exception as e:
             return make_response(jsonify({"erro": f"Erro ao ativar: {str(e)}"}), 500)
+
+    @staticmethod
+    def login():
+        try:
+            data = request.get_json()
+            email = data.get('email')
+            senha = data.get('senha')
+
+            if not email or not senha:
+                return make_response(jsonify({"erro": "Email e senha são obrigatórios"}), 400)
+
+            user = UserService.authenticate_user(email, senha)
+            if not user:
+                return make_response(jsonify({"erro": "Credenciais inválidas ou usuário inativo"}), 401)
+
+            token = create_access_token(identity=user.id)
+            return make_response(jsonify({
+                "mensagem": "Login com sucesso",
+                "token": token
+            }), 200)
+
+        except Exception as e:
+            return make_response(jsonify({"erro": f"Erro no login: {str(e)}"}), 500)
