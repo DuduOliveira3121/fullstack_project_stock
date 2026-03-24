@@ -1,5 +1,6 @@
 import random
-from werkzeug.security import generate_password_hash
+from flask import current_app
+from werkzeug.security import generate_password_hash, check_password_hash
 from src.Domain.user import UserDomain
 from src.Infrastructure.Model.user import User
 from src.config.data_base import db
@@ -29,11 +30,14 @@ class UserService:
 
         hashed_password = generate_password_hash(senha)
 
-        # Envio real via Twilio
-        try:
-            Whatsapp.send_message(celular, code)
-        except Exception as e:
-            raise Exception(f"Falha na verificação de WhatsApp: {str(e)}")
+        # Envio real via Twilio (pula se DESATIVADO)
+        if not current_app.config.get('DISABLE_WHATSAPP', False):
+            try:
+                Whatsapp.send_message(celular, code)
+            except Exception as e:
+                raise Exception(f"Falha na verificação de WhatsApp: {str(e)}")
+        else:
+            print("⚠️ WhatsApp desabilitado no ambiente; código não será enviado")
 
         user = User(
             name=nome,
@@ -65,3 +69,17 @@ class UserService:
             return True
         
         return False
+
+    @staticmethod
+    def authenticate_user(email, senha):
+        user = User.query.filter_by(email=email).first()
+        if user is None:
+            return None
+
+        if not user.is_verified:
+            return None
+
+        if not check_password_hash(user.password, senha):
+            return None
+
+        return user

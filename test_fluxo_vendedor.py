@@ -225,10 +225,17 @@ def main():
     # PASSO 4
     sucesso = passo_4_ativar_seller(codigo)
     
+    if sucesso:
+        # PASSO 5: Teste de autenticação JWT conforme README
+        print_info("\n🔐 Iniciando teste de autenticação JWT...")
+        jwt_token = passo_5_testar_login_jwt()
+    else:
+        jwt_token = None
+
     # RESULTADO FINAL
     print_step("RESUMO", "RESULTADO FINAL")
     
-    if sucesso:
+    if sucesso and jwt_token:
         print_success("✨ FLUXO COMPLETO FINALIZADO COM SUCESSO! ✨")
         print("\n📊 Resumo:")
         print(f"   • Seller criado: {TEST_USER['email']}")
@@ -236,10 +243,55 @@ def main():
         print(f"   • Celular: {TEST_USER['celular']}")
         print(f"   • Código recebido: {codigo}")
         print(f"   • Status: ATIVADO")
+        print(f"   • JWT Token: {jwt_token[:30]}...")
+    elif sucesso:
+        print_error("🚨 Seller ativado, mas falha no login JWT")
     else:
         print_error("Teste finalizado com erro na ativação")
     
     print("\n" + "="*70)
+
+# ==================== PASSO 5: TESTAR LOGIN JWT APÓS ATIVAÇÃO ====================
+def passo_5_testar_login_jwt():
+    print_step(5, "TESTANDO LOGIN JWT (USUÁRIO ATIVADO)")
+
+    payload = {
+        "email": TEST_USER["email"],
+        "senha": TEST_USER["senha"]
+    }
+
+    print_info("Tentando obter token JWT via /api/auth/login...")
+
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/auth/login",
+            json=payload,
+            headers=HEADERS,
+            timeout=10
+        )
+
+        print(f"Status: {response.status_code}")
+        response_data = response.json()
+
+        if response.status_code == 200:
+            print_success("✅ Login JWT bem-sucedido!")
+            token = response_data.get('token')
+            if token:
+                print_info(f"Token JWT: {token[:30]}...")
+                return token
+            else:
+                print_error("❌ Nenhum token JWT retornado")
+                return None
+        else:
+            print_error(f"❌ Falha no login JWT: {response_data.get('erro')}")
+            return None
+
+    except requests.exceptions.ConnectionError:
+        print_error("Não conseguiu conectar à API em /api/auth/login para JWT")
+        return None
+    except Exception as e:
+        print_error(f"Erro: {str(e)}")
+        return None
 
 if __name__ == "__main__":
     main()
