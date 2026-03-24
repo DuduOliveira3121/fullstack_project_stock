@@ -15,5 +15,9 @@ def init_routes(app):
     @app.route('/api/sellers/activate', methods=['POST'])
     def activate_seller():
         return UserController.activate_user()
+    
+    @app.route('/api/auth/login', methods=['POST'])
+    def login():
+        return UserController.login()
 
 
