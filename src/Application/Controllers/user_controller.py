@@ -6,23 +6,46 @@ class UserController:
     def register_user():
         try:
             data = request.get_json()
-            name = data.get('name')
+            nome = data.get('nome')
+            cnpj = data.get('cnpj')
             email = data.get('email')
-            password = data.get('password')
-            phone = data.get('phone')
+            celular = data.get('celular')
+            senha = data.get('senha')
 
-            if not name or not email or not password or not phone:
-                return make_response(jsonify({"erro": "Missing required fields"}), 400)
+            if not nome or not cnpj or not email or not celular or not senha:
+                return make_response(jsonify({"erro": "Campo obrigatório faltando"}), 400)
 
-            user = UserService.create_user(name, email, password, phone)
+            user = UserService.create_user(nome, cnpj, email, celular, senha)
             return make_response(jsonify({
-                "mensagem": "User salvo com sucesso",
-                "usuarios": user.to_dict()
+                "mensagem": "Seller cadastrado com sucesso",
+                "usuario": user.to_dict()
             }), 200)
         
         except ValueError as e:
-            # Erros de validação (email duplicado, etc)
             return make_response(jsonify({"erro": str(e)}), 400)
         except Exception as e:
-            # Outros erros
             return make_response(jsonify({"erro": f"Erro ao cadastrar: {str(e)}"}), 500)
+
+    @staticmethod
+    def activate_user():
+        try:
+            data = request.get_json()
+            celular = data.get('celular')
+            codigo = data.get('codigo')
+
+            if not celular or not codigo:
+                return make_response(jsonify({"erro": "celular e codigo são obrigatórios"}), 400)
+
+            result = UserService.activate_user(celular, codigo)
+            
+            if result:
+                return make_response(jsonify({
+                    "mensagem": "Seller ativado com sucesso!"
+                }), 200)
+            else:
+                return make_response(jsonify({"erro": "Código de ativação inválido"}), 400)
+        
+        except ValueError as e:
+            return make_response(jsonify({"erro": str(e)}), 400)
+        except Exception as e:
+            return make_response(jsonify({"erro": f"Erro ao ativar: {str(e)}"}), 500)

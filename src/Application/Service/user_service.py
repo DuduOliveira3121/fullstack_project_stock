@@ -8,33 +8,41 @@ from src.Infrastructure.http.whats_app import Whatsapp
 class UserService:
 
     @staticmethod
-    def create_user(name, email, password, phone):
-        if not name or not email or not password or not phone:
+    def create_user(nome, cnpj, email, celular, senha):
+        if not nome or not cnpj or not email or not celular or not senha:
             raise ValueError("Todos os campos são obrigatórios")
 
-        existing_user = User.query.filter_by(email=email).first()
-        if existing_user:
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email:
             raise ValueError("Usuário com este email já existe")
+        
+        existing_cnpj = User.query.filter_by(cnpj=cnpj).first()
+        if existing_cnpj:
+            raise ValueError("Usuário com este CNPJ já existe")
+        
+        existing_phone = User.query.filter_by(phone=celular).first()
+        if existing_phone:
+            raise ValueError("Usuário com este celular já existe")
 
-        # Ajustado para 4 dígitos conforme o requisito
+        # Gera código de 4 dígitos
         code = random.randint(1000, 9999)
 
-        hashed_password = generate_password_hash(password)
+        hashed_password = generate_password_hash(senha)
 
-        # O envio agora é real via Twilio
+        # Envio real via Twilio
         try:
-            Whatsapp.send_message(phone, code)
+            Whatsapp.send_message(celular, code)
         except Exception as e:
-            # Se o WhatsApp falhar, interrompemos a criação para não gerar lixo no banco
             raise Exception(f"Falha na verificação de WhatsApp: {str(e)}")
 
         user = User(
-            name=name,
+            name=nome,
+            cnpj=cnpj,
             email=email,
-            phone=phone,
+            phone=celular,
             password=hashed_password,
             code=code,
-            is_verified=False # O seller começa desativado
+            is_verified=False
         )
 
         db.session.add(user)
@@ -43,16 +51,16 @@ class UserService:
         return UserDomain(user.id, user.name, user.email)
 
     @staticmethod
-    def activate_user(user_id, input_code):
-        """Novo método para validar o código inserido pelo Seller"""
-        user = User.query.get(user_id)
+    def activate_user(celular, codigo):
+        """Ativa o Seller validando o código enviado via WhatsApp"""
+        user = User.query.filter_by(phone=celular).first()
         
         if not user:
             raise ValueError("Usuário não encontrado")
         
-        if str(user.code) == str(input_code):
-            user.is_active = True
-            user.code = None # Limpa o código após sucesso
+        if str(user.code) == str(codigo):
+            user.is_verified = True
+            user.code = None
             db.session.commit()
             return True
         
