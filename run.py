@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from src.config.data_base import init_db
+from src.config.di_container import DIContainer
 from src.routes import init_routes
 
 def create_app():
@@ -18,6 +19,9 @@ def create_app():
     init_db(app)
 
     JWTManager(app)
+
+    with app.app_context():
+        DIContainer.setup()
 
     init_routes(app)
 

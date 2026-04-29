@@ -1,10 +1,9 @@
 import random
-from flask import current_app
 from werkzeug.security import generate_password_hash, check_password_hash
+
+from src.config.di_container import DIContainer
 from src.Domain.user import UserDomain
-from src.Infrastructure.Model.user import User
-from src.config.data_base import db
-from src.Infrastructure.http.whats_app import Whatsapp
+
 
 class UserService:
 
@@ -13,66 +12,60 @@ class UserService:
         if not nome or not cnpj or not email or not celular or not senha:
             raise ValueError("Todos os campos são obrigatórios")
 
-        existing_email = User.query.filter_by(email=email).first()
-        if existing_email:
+        user_repo = DIContainer.get_user_repository()
+        whatsapp = DIContainer.get_whatsapp_service()
+
+        if user_repo.find_by_email(email):
             raise ValueError("Usuário com este email já existe")
-        
-        existing_cnpj = User.query.filter_by(cnpj=cnpj).first()
-        if existing_cnpj:
+
+        if user_repo.find_by_cnpj(cnpj):
             raise ValueError("Usuário com este CNPJ já existe")
-        
-        existing_phone = User.query.filter_by(phone=celular).first()
-        if existing_phone:
+
+        if user_repo.find_by_phone(celular):
             raise ValueError("Usuário com este celular já existe")
 
-        # Gera código de 4 dígitos
         code = random.randint(1000, 9999)
-
         hashed_password = generate_password_hash(senha)
 
-        # Envio real via Twilio (pula se DESATIVADO)
-        if not current_app.config.get('DISABLE_WHATSAPP', False):
-            try:
-                Whatsapp.send_message(celular, code)
-            except Exception as e:
-                raise Exception(f"Falha na verificação de WhatsApp: {str(e)}")
-        else:
-            print("⚠️ WhatsApp desabilitado no ambiente; código não será enviado")
+        whatsapp.send_verification_code(celular, str(code))
 
-        user = User(
+        new_user = UserDomain(
             name=nome,
             cnpj=cnpj,
             email=email,
             phone=celular,
-            password=hashed_password,
-            code=code,
-            is_verified=False
+            is_verified=False,
         )
+        new_user.password = hashed_password
+        new_user.code = code
 
-        db.session.add(user)
-        db.session.commit()
-
-        return UserDomain(user.id, user.name, user.email)
+        user_id = user_repo.save(new_user)
+        saved = user_repo.find_by_id(user_id)
+        return saved
 
     @staticmethod
     def activate_user(celular, codigo):
         """Ativa o Seller validando o código enviado via WhatsApp"""
-        user = User.query.filter_by(phone=celular).first()
-        
+        user_repo = DIContainer.get_user_repository()
+
+        user = user_repo.find_by_phone(celular)
         if not user:
             raise ValueError("Usuário não encontrado")
-        
+
         if str(user.code) == str(codigo):
             user.is_verified = True
             user.code = None
-            db.session.commit()
+            user.activate()
+            user_repo.update(user.id, user)
             return True
-        
+
         return False
 
     @staticmethod
     def authenticate_user(email, senha):
-        user = User.query.filter_by(email=email).first()
+        user_repo = DIContainer.get_user_repository()
+
+        user = user_repo.find_by_email(email)
         if user is None:
             return None
 
