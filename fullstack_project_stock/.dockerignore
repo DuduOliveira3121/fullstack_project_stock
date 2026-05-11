@@ -1,0 +1,5 @@
+﻿.db
+.db/mysql.sock
+.venv
+__pycache__
+*.pyc
