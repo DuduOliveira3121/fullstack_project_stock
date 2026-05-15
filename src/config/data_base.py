@@ -28,5 +28,8 @@ def init_db(app):
     
     # Cria as tabelas automaticamente
     with app.app_context():
+        from src.Infrastructure.Model import user     # noqa
+        from src.Infrastructure.Model import product  # noqa
+        from src.Infrastructure.Model import sale     # noqa
         db.create_all()
 
