@@ -4,7 +4,7 @@ from src.config.data_base import init_db
 from src.config.di_container import DIContainer
 from src.routes import init_routes
 
-def create_app():
+def create_app(test_config=None):
     """
     Função que cria e configura a aplicação Flask.
     """
@@ -15,6 +15,9 @@ def create_app():
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
     # Em desenvolvimento local, evite gerenciar Twilio de verdade
     app.config['DISABLE_WHATSAPP'] = False
+
+    if test_config:
+        app.config.update(test_config)
 
     init_db(app)
 

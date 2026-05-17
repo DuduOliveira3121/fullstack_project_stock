@@ -65,7 +65,7 @@ class UserController:
             if not user:
                 return make_response(jsonify({"erro": "Credenciais inválidas ou usuário inativo"}), 401)
 
-            token = create_access_token(identity=user.id)
+            token = create_access_token(identity=str(user.id))
             return make_response(jsonify({
                 "mensagem": "Login com sucesso",
                 "token": token

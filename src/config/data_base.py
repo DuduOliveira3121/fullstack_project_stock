@@ -14,9 +14,11 @@ def init_db(app):
     
     # ========== OPÇÃO 1: SQLite (Sem Docker) ==========
     # Banco de dados local, arquivo criado na pasta do projeto
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    db_path = os.path.join(basedir, '..', '..', 'market_management.db')
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    # (não sobrescreve se já configurado, ex: testes com sqlite:///:memory:)
+    if not app.config.get('SQLALCHEMY_DATABASE_URI'):
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        db_path = os.path.join(basedir, '..', '..', 'market_management.db')
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     
     # ========== OPÇÃO 2: MySQL (Com Docker) ==========
     # Descomente a linha abaixo e comente a linha do SQLite acima

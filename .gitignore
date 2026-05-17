@@ -17,3 +17,19 @@ env/
 
 # OS
 .DS_Store
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+
+# Flask instance folder
+instance/
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
