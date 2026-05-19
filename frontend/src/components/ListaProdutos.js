@@ -1,8 +1,13 @@
+import { useState } from 'react';
+
 // Componente que exibe a tabela de produtos e ações de editar/desativar
 // Props:
 //   produtos    — array de produtos vindo da API
 //   onDesativar — callback chamado após desativar um produto
 function ListaProdutos({ produtos, onDesativar }) {
+
+  // Controla qual imagem está aberta no modal (null = fechado)
+  const [imagemModal, setImagemModal] = useState(null);
 
   // Desativa o produto chamando PATCH /api/products/:id/inactivate
   async function handleDesativar(id) {
@@ -36,7 +41,19 @@ function ListaProdutos({ produtos, onDesativar }) {
   }
 
   return (
-    <table style={estilos.tabela}>
+    <>
+      {/* Modal de imagem ampliada — aparece ao clicar na miniatura */}
+      {imagemModal && (
+        <div style={estilos.overlay} onClick={() => setImagemModal(null)}>
+          <div style={estilos.modalCaixa} onClick={(e) => e.stopPropagation()}>
+            <button style={estilos.fechar} onClick={() => setImagemModal(null)}>✕</button>
+            <img src={imagemModal.url} alt={imagemModal.nome} style={estilos.imagemGrande} />
+            <p style={estilos.modalNome}>{imagemModal.nome}</p>
+          </div>
+        </div>
+      )}
+
+      <table style={estilos.tabela}>
       <thead>
         <tr>
           <th style={estilos.th}>Imagem</th>
@@ -54,7 +71,13 @@ function ListaProdutos({ produtos, onDesativar }) {
           <tr key={produto.id}>
             <td style={estilos.td}>
               {produto.image_url
-                ? <img src={produto.image_url} alt={produto.name} style={estilos.imagem} />
+                ? <img
+                    src={produto.image_url}
+                    alt={produto.name}
+                    style={{ ...estilos.imagem, cursor: 'zoom-in' }}
+                    onClick={() => setImagemModal({ url: produto.image_url, nome: produto.name })}
+                    title="Clique para ampliar"
+                  />
                 : <div style={estilos.semImagem}>sem<br/>foto</div>
               }
             </td>
@@ -89,6 +112,7 @@ function ListaProdutos({ produtos, onDesativar }) {
         ))}
       </tbody>
     </table>
+    </>
   );
 }
 
@@ -103,6 +127,13 @@ const estilos = {
   badgeInativo:  { backgroundColor: '#f8d7da', color: '#721c24', padding: '2px 8px', borderRadius: '12px', fontSize: '12px' },
   botaoEditar:   { marginRight: '8px', padding: '5px 12px', backgroundColor: '#ffc107', color: '#333', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' },
   botaoDesativar:{ padding: '5px 12px', backgroundColor: '#dc3545', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' },
+
+  // Estilos do modal de imagem ampliada
+  overlay:       { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
+  modalCaixa:    { backgroundColor: '#fff', borderRadius: '12px', padding: '24px', maxWidth: '90vw', maxHeight: '90vh', textAlign: 'center', position: 'relative' },
+  imagemGrande:  { maxWidth: '70vw', maxHeight: '70vh', objectFit: 'contain', borderRadius: '8px', display: 'block', margin: '0 auto' },
+  modalNome:     { marginTop: '12px', fontWeight: 'bold', fontSize: '16px', color: '#333' },
+  fechar:        { position: 'absolute', top: '10px', right: '14px', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#888' },
 };
 
 export default ListaProdutos;
