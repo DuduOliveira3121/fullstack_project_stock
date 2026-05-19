@@ -15,13 +15,13 @@ def create_app(test_config=None):
     app.config['JWT_SECRET_KEY'] = 'super-seguro-por-exemplo'  # altere em produção
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
     # Em desenvolvimento local, evite gerenciar Twilio de verdade
-    app.config['DISABLE_WHATSAPP'] = False
+    app.config['DISABLE_WHATSAPP'] = True  # ← desativado: código aparece no terminal
 
     if test_config:
         app.config.update(test_config)
 
-    # Habilita CORS para o frontend React (localhost:3000)
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+    # Habilita CORS para qualquer origem localhost (React pode subir em 3000, 3001, 3003...)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     init_db(app)
 
