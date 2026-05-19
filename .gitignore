@@ -1,3 +1,4 @@
+# ─── Python ───────────────────────────────────────────────
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -6,17 +7,9 @@ __pycache__/
 # Virtual environment
 .venv/
 env/
-.env
 
 # SQLite database
 *.db
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-.DS_Store
 
 # Pytest cache
 .pytest_cache/
@@ -32,4 +25,26 @@ instance/
 # Distribution / packaging
 *.egg-info/
 dist/
-build/
+
+# ─── Variáveis de ambiente ────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ─── IDE / Editor ─────────────────────────────────────────
+.vscode/
+.idea/
+
+# ─── OS ───────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Node / React (frontend) ──────────────────────────────
+node_modules/
+frontend/build/
+
+# Logs de npm / yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*

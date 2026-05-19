@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 from src.config.data_base import init_db
 from src.config.di_container import DIContainer
 from src.routes import init_routes
@@ -18,6 +19,9 @@ def create_app(test_config=None):
 
     if test_config:
         app.config.update(test_config)
+
+    # Habilita CORS para o frontend React (localhost:3000)
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
     init_db(app)
 

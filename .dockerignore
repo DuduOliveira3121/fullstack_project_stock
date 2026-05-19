@@ -1,5 +1,20 @@
-﻿.db
-.db/mysql.sock
+﻿# Python
 .venv
 __pycache__
 *.pyc
+*.db
+
+# Node / React
+frontend/node_modules
+frontend/build
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+
+# IDE e OS
+.vscode
+.idea
+.DS_Store
+.git
+.gitignore
